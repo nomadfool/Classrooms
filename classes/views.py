@@ -130,21 +130,22 @@ def student_create(request, classroom_id):
 def student_update(request, student_id, classroom_id):
   student = Student.objects.get(id=student_id)
   classroom = Classroom.objects.get(id=classroom_id)
-  if request.user == classroom.teacher:
-    form = StudentForm(instance=student)
-    if request.method == "POST":
-      form = StudentForm(request.POST, instance=student)
-      if form.is_valid():
-        form.save()
-        messages.success(request, "Successfully Edited!")
-        return redirect(classroom.get_absolute_url())
-      print (form.errors)
-    context = {
+  if not request.user == classroom.teacher:
+    return redirect("no-access")
+  form = StudentForm(instance=student)
+  if request.method == "POST":
+    form = StudentForm(request.POST, instance=student)
+    if form.is_valid():
+      form.save()
+      messages.success(request, "Successfully Edited!")
+      return redirect(classroom.get_absolute_url())
+    print (form.errors)
+  context = {
     "form": form,
     "student": student,
     "classroom" : classroom,
     }
-    return render(request, 'update_student.html', context)
+  return render(request, 'update_student.html', context)
 
 
 def student_delete(request, student_id, classroom_id):
